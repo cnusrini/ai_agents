@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Azure OpenAI Chat Tester</title>
+    <style>
+      :root { color-scheme: light; }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+        background: #f7f7fb;
+        color: #111;
+      }
+      .wrap {
+        max-width: 900px;
+        margin: 32px auto;
+        padding: 0 16px;
+      }
+      .card {
+        background: #fff;
+        border: 1px solid #e7e7ee;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0,0,0,.06);
+        overflow: hidden;
+      }
+      header {
+        padding: 16px 18px;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      header .title {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      header h1 {
+        font-size: 16px;
+        margin: 0;
+        font-weight: 700;
+      }
+      header p {
+        margin: 0;
+        font-size: 12px;
+        color: #666;
+      }
+      .pill {
+        font-size: 12px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid #e7e7ee;
+        background: #fafafe;
+        color: #333;
+      }
+      #chat {
+        height: 520px;
+        overflow: auto;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        background: linear-gradient(#fff, #fff) padding-box,
+          radial-gradient(1200px 600px at 10% 0%, rgba(99,102,241,.10), transparent 50%),
+          radial-gradient(1200px 600px at 90% 0%, rgba(16,185,129,.10), transparent 50%);
+      }
+      .msg {
+        max-width: 78%;
+        padding: 10px 12px;
+        border-radius: 14px;
+        border: 1px solid #ececf3;
+        background: #ffffffcc;
+        backdrop-filter: blur(6px);
+        line-height: 1.35;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .msg.user {
+        align-self: flex-end;
+        border-color: #dbeafe;
+        background: #eff6ff;
+      }
+      .msg.ai {
+        align-self: flex-start;
+        border-color: #dcfce7;
+        background: #f0fdf4;
+      }
+      .meta {
+        font-size: 11px;
+        color: #666;
+        margin-top: 6px;
+      }
+      footer {
+        border-top: 1px solid #eee;
+        padding: 12px;
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        background: #fff;
+      }
+      textarea {
+        flex: 1;
+        resize: none;
+        min-height: 44px;
+        max-height: 140px;
+        padding: 10px 12px;
+        border-radius: 12px;
+        border: 1px solid #e7e7ee;
+        outline: none;
+        font-size: 14px;
+        line-height: 1.35;
+      }
+      textarea:focus { border-color: #b7b7ff; box-shadow: 0 0 0 4px rgba(99,102,241,.12); }
+      .btns { display: flex; gap: 8px; }
+      button {
+        border: 1px solid #e7e7ee;
+        background: #111;
+        color: #fff;
+        padding: 10px 12px;
+        border-radius: 12px;
+        font-weight: 650;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: #fff;
+        color: #111;
+      }
+      button:disabled { opacity: .6; cursor: not-allowed; }
+      .hint {
+        font-size: 12px;
+        color: #666;
+        padding: 10px 12px 14px;
+      }
+      code.kbd {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+        font-size: 11px;
+        padding: 2px 6px;
+        border: 1px solid #e7e7ee;
+        border-bottom-width: 2px;
+        border-radius: 8px;
+        background: #fafafe;
+        color: #333;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="wrap">
+      <div class="card">
+        <header>
+          <div class="title">
+            <h1>Azure OpenAI Chat Tester</h1>
+            <p>Calls <span class="pill">POST /chat</span> on your FastAPI service</p>
+          </div>
+          <div class="pill" id="status">Idle</div>
+        </header>
+
+        <div id="chat">
+          <div class="msg ai">
+            Hello. Send a message to test your FastAPI + Azure OpenAI endpoint.
+            <div class="meta">Tip: press <code class="kbd">Enter</code> to send, <code class="kbd">Shift</code>+<code class="kbd">Enter</code> for newline.</div>
+          </div>
+        </div>
+
+        <footer>
+          <textarea id="input" placeholder="Type your message..."></textarea>
+          <div class="btns">
+            <button class="secondary" id="clearBtn" type="button">Clear</button>
+            <button id="sendBtn" type="button">Send</button>
+          </div>
+        </footer>
+
+        <div class="hint">
+          If you open this file via VS Code Live Preview, use a relative fetch (<code class="kbd">/chat</code>) only when the UI is served by FastAPI.
+          Otherwise it will call <code class="kbd">http://127.0.0.1:8000/chat</code>.
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const chatEl = document.getElementById("chat");
+      const inputEl = document.getElementById("input");
+      const sendBtn = document.getElementById("sendBtn");
+      const clearBtn = document.getElementById("clearBtn");
+      const statusEl = document.getElementById("status");
+
+      function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, (m) => ({
+          "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;"
+        }[m]));
+      }
+
+      function addMessage(role, text) {
+        const div = document.createElement("div");
+        div.className = `msg ${role === "user" ? "user" : "ai"}`;
+        div.innerHTML = escapeHtml(text);
+        chatEl.appendChild(div);
+        chatEl.scrollTop = chatEl.scrollHeight;
+        return div;
+      }
+
+      function setBusy(busy) {
+        sendBtn.disabled = busy;
+        inputEl.disabled = busy;
+        statusEl.textContent = busy ? "Thinking..." : "Idle";
+        statusEl.style.background = busy ? "#111" : "#fafafe";
+        statusEl.style.color = busy ? "#fff" : "#333";
+        statusEl.style.borderColor = busy ? "#111" : "#e7e7ee";
+      }
+
+      // If the UI is not being served by FastAPI, use full URL.
+      // If you serve this UI from FastAPI at "/", change CHAT_URL to "/chat".
+      //const CHAT_URL = "http://127.0.0.1:8000/chat";
+      const CHAT_URL = "/chat";
+
+    
+
+      async function send() {
+        const text = inputEl.value.trim();
+        if (!text) return;
+
+        addMessage("user", text);
+        inputEl.value = "";
+        setBusy(true);
+
+        const placeholder = addMessage("ai", "…");
+
+        try {
+          const res = await fetch(CHAT_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: text })
+          });
+
+          if (!res.ok) {
+            const err = await res.text();
+            placeholder.innerHTML = `<span style="color:#b00020">Error ${res.status}: ${escapeHtml(err)}</span>`;
+            return;
+          }
+
+          const data = await res.json();
+          placeholder.textContent = data.response ?? "(No response)";
+        } catch (e) {
+          placeholder.innerHTML = `<span style="color:#b00020">Request failed: ${escapeHtml(String(e))}</span>`;
+        } finally {
+          setBusy(false);
+          inputEl.focus();
+        }
+      }
+
+      sendBtn.addEventListener("click", send);
+
+      inputEl.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          send();
+        }
+      });
+
+      clearBtn.addEventListener("click", () => {
+        chatEl.innerHTML = "";
+        addMessage("ai", "Cleared. Send a message to test again.");
+        inputEl.focus();
+      });
+
+      inputEl.focus();
+    </script>
+  </body>
+</html>
