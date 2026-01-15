@@ -1,9 +1,8 @@
-import os
-import time
+import os, time
 from azure.ai.projects import AIProjectClient
-from azure.core.credentials import AzureKeyCredential
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects.models import MessageTextContent
 from dotenv import load_dotenv
-import traceback
 
 # Load environment variables
 load_dotenv()
