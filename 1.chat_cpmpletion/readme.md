@@ -2,6 +2,91 @@
 
 A comprehensive tutorial demonstrating how to build AI chat agents using Azure OpenAI service with three different implementation approaches: terminal-based, FastAPI with Swagger, and FastAPI with an intuitive UI interface.
 
+## Azure AI Development Stack Architecture
+````text
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 5: Your Application                                  │
+│ (Your actual chatbot, agent, or AI app)                    │
+└──────────────────────┬──────────────────────────────────────┘
+                       │
+         ┌─────────────┼─────────────┬──────────────┐
+         ↓             ↓             ↓              ↓
+┌──────────────┐ ┌──────────┐ ┌────────────┐ ┌──────────────┐
+│ LAYER 4A:    │ │ LAYER 4B:│ │ LAYER 4C:  │ │ LAYER 4D:    │
+│ LangChain    │ │ Semantic │ │ AutoGen    │ │ Direct Code  │
+│ (Framework)  │ │ Kernel   │ │ (Multi-    │ │ (No          │
+│              │ │ (MS      │ │ Agent)     │ │ Framework)   │
+│              │ │ Framework│ │            │ │              │
+└──────┬───────┘ └────┬─────┘ └─────┬──────┘ └──────┬───────┘
+       │              │              │               │
+       └──────────────┴──────────────┴───────────────┘
+                       ↓
+         ┌─────────────┴─────────────┐
+         ↓                           ↓
+┌──────────────────────┐   ┌──────────────────────┐
+│ LAYER 3A:            │   │ LAYER 3B:            │
+│ Azure AI Foundry SDK │   │ Azure OpenAI SDK     │
+│ (Platform features)  │   │ (Direct API)         │
+└──────────┬───────────┘   └──────────┬───────────┘
+           │                          │
+           └──────────┬───────────────┘
+                      ↓
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 2: Azure AI Services (Infrastructure)                │
+│ ├─ Azure OpenAI Service (GPT-4, GPT-3.5)                   │
+│ ├─ Azure AI Search (Vector DB)                             │
+│ ├─ Azure Content Safety                                    │
+│ ├─ Azure AI Foundry (Platform/Portal)                      │
+│ └─ Azure Storage, Functions, etc.                          │
+└──────────────────────┬──────────────────────────────────────┘
+                       ↓
+┌─────────────────────────────────────────────────────────────┐
+│ LAYER 1: The Actual LLM (Same for all!)                    │
+│ GPT-4, GPT-3.5 running on Azure infrastructure             │
+│ (96 transformer layers, self-attention, etc.)              │
+└─────────────────────────────────────────────────────────────┘
+````
+
+### Layer Descriptions
+
+**Layer 5 - Your Application**
+- Your custom-built chatbot, AI agent, or intelligent application
+- This is where your business logic and user interface live
+
+**Layer 4 - Optional Orchestration Frameworks**
+- **4A - LangChain**: Third-party framework with rich ecosystem
+- **4B - Semantic Kernel**: Microsoft's AI orchestration framework
+- **4C - AutoGen**: Multi-agent conversation framework
+- **4D - Direct Code**: Build without any framework
+
+**Layer 3 - Azure SDKs**
+- **3A - Azure AI Foundry SDK**: Platform approach with built-in RAG, evaluation, monitoring
+- **3B - Azure OpenAI SDK**: Direct API access with full control
+
+**Layer 2 - Azure AI Services**
+- Azure OpenAI Service (hosts GPT-4, GPT-3.5)
+- Azure AI Search (vector database and hybrid search)
+- Azure Content Safety (content moderation)
+- Supporting infrastructure (Storage, Functions, etc.)
+
+**Layer 1 - The LLM Core**
+- The actual GPT models running on Azure infrastructure
+- Same transformer architecture regardless of which layers you use above
+````
+````
+
+---
+
+
+
+---
+
+
+````
+
+---
+
+
 ## 🎯 Overview
 
 This repository contains three progressively enhanced implementations of an AI chat agent using Azure OpenAI:

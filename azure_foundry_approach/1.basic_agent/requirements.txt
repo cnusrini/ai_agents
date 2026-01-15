@@ -1,0 +1,11 @@
+# Core Azure AI Foundry SDK
+azure-ai-projects==1.0.0b5
+
+# Authentication
+azure-identity==1.20.0
+
+# Environment variable management
+python-dotenv==1.0.1
+
+# Core Azure dependencies (auto-installed but pinned for reproducibility)
+azure-core==1.32.0
