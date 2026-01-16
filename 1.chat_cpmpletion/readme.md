@@ -556,7 +556,6 @@ If you encounter any issues or have questions:
 ### 💬 Community & Discussion:
 
 **Join our Discord community** for:
-- 🤝 Real-time help and support
 - 💡 Feature discussions and ideas
 - 🎓 Learning resources and tips
 - 👥 Connect with other developers
