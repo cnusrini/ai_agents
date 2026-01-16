@@ -809,7 +809,6 @@ Iteration 4: Process token [4], use cached K,V for tokens 1, 2, 3
 ### 💬 Community & Discussion:
 
 **Join our Discord community** for:
-- 🤝 Real-time help and support
 - 💡 Feature discussions and ideas
 - 🎓 Learning resources and tips
 - 👥 Connect with other developers
