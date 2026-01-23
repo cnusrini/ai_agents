@@ -18,7 +18,7 @@ client = AzureOpenAI(
     api_key=AZURE_API_KEY,
     api_version="2025-01-01-preview",
 )
-\
+
 client.completions.
 
 response = client.chat.completions.create(

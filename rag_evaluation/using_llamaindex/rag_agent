@@ -1,0 +1,63 @@
+import os
+from dotenv import load_dotenv
+from azure.identity import DefaultAzureCredential
+from azure.ai.projects import AIProjectClient
+from azure.ai.projects.models import AzureAISearchTool
+
+load_dotenv()
+
+PROJECT_CONNECTION_STRING = os.getenv("PROJECT_CONNECTION_STRING")
+MODEL_DEPLOYMENT_NAME = os.getenv("MODEL_DEPLOYMENT_NAME")
+AI_SEARCH_INDEX_NAME = os.getenv("AI_SEARCH_INDEX_NAME")
+CONN_ID = os.getenv("CONN_ID")
+
+project_client = AIProjectClient.from_connection_string(
+    credential = DefaultAzureCredential(),
+    conn_str = PROJECT_CONNECTION_STRING
+)
+
+ai_search_tool = AzureAISearchTool(index_connection_id=CONN_ID,index_name=AI_SEARCH_INDEX_NAME)
+
+with project_client:
+    print("in with loop")
+    agent = project_client.agents.create_agent(
+        model=MODEL_DEPLOYMENT_NAME,
+        name="ai-search-assistant",
+        instructions="You are a helpful assistant",
+        tools=ai_search_tool.definitions,
+        tool_resources=ai_search_tool.resources,
+        headers={"x-ms-enable-preview": "true"},
+    )
+
+    print("agent",agent.id)
+    print("tools definitions",agent.tools)
+    print("tool_resources",agent.tool_resources)
+    
+    thread_id = project_client.agents.create_thread()
+    message = project_client.agents.create_message(
+        thread_id=thread_id.id,
+        role = "user",
+        content = "give me the abstract of this research paper"
+
+    )
+
+    print("message id",message.id)
+    messages = project_client.agents.list_messages(
+        thread_id=thread_id.id
+    )
+
+    print("messages",messages)
+
+     # print the assistant response
+    print(f"Assistant Response: {messages.data[0].content[0].text.value}")
+    print("\n")
+
+
+    #Displaying the URL Citation - the URL citation doesn't work too well as of now! 
+    content = messages['data'][0]['content'][0]
+    url_citation = content['text']['annotations'][0]['url_citation']['url'] 
+    print(url_citation)
+
+   
+
+
